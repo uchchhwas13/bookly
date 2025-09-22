@@ -23,3 +23,20 @@ class UserModel(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class UserLoginModel(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=6)
+
+
+class UserResponse(BaseModel):
+    email: EmailStr
+    uid: str
+
+
+class LoginResponse(BaseModel):
+    message: str
+    access_token: str
+    refresh_token: str
+    user: UserResponse
