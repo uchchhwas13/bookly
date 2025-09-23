@@ -4,6 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .utils import verify_access_token, verify_refresh_token
 from fastapi.exceptions import HTTPException
 from abc import ABC, abstractmethod
+from src.db.redis import token_in_blocklist
 
 
 class TokenBearer(HTTPBearer, ABC):
@@ -17,7 +18,7 @@ class TokenBearer(HTTPBearer, ABC):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Not authenticated"
             )
-        if not self.validate_token(creds.credentials):
+        if not await self.validate_token(creds.credentials):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid or expired Token"
@@ -25,17 +26,45 @@ class TokenBearer(HTTPBearer, ABC):
         return creds
 
     @abstractmethod
-    def validate_token(self, token: str) -> bool:
+    async def validate_token(self, token: str) -> bool:
         ...
 
 
 class AccessTokenBearer(TokenBearer):
-    def validate_token(self, token: str) -> bool:
+    async def validate_token(self, token: str) -> bool:
         token_data = verify_access_token(token)
-        return True if token_data is not None else False
+        if not token_data:
+            return False
+        jti = token_data.get("jti")
+        if not jti:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "Invalid token payload",
+                        "resolution": "Request a new token"}
+            )
+        if await token_in_blocklist(jti):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
+                "error": "This token is invalid or revoked",
+                "resolution": "please get new token"
+            })
+        return True
 
 
 class RefreshTokenBearer(TokenBearer):
-    def validate_token(self, token: str) -> bool:
+    async def validate_token(self, token: str) -> bool:
         token_data = verify_refresh_token(token)
-        return True if token_data is not None else False
+        if not token_data:
+            return False
+        jti = token_data.get("jti")
+        if not jti:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error": "Invalid token payload",
+                        "resolution": "Request a new token"}
+            )
+        if await token_in_blocklist(jti):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={
+                "error": "This token is invalid or revoked",
+                "resolution": "please get new token"
+            })
+        return True
