@@ -1,3 +1,4 @@
+from typing import TypedDict
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
@@ -11,6 +12,11 @@ ACCESS_TOKEN_EXPIRY_DURATION = 300
 REFRESH_TOKEN_EXPIRY_DURATION = 3600
 
 
+class UserDataDict(TypedDict):
+    email: str
+    user_uid: str
+
+
 def generate_password_hash(password: str) -> str:
     return password_context.hash(password)
 
@@ -19,7 +25,7 @@ def verify_password(password: str, hash: str) -> bool:
     return password_context.verify(password, hash)
 
 
-def create_access_token(user_data: dict[str, str]) -> str:
+def create_access_token(user_data: UserDataDict) -> str:
     payload: dict[str, Any] = {
         "user": user_data,
         "exp": datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TOKEN_EXPIRY_DURATION),
@@ -35,7 +41,7 @@ def create_access_token(user_data: dict[str, str]) -> str:
     return token
 
 
-def create_refresh_token(user_data: dict[str, str]) -> str:
+def create_refresh_token(user_data: UserDataDict) -> str:
     payload: dict[str, Any] = {
         "user": user_data,
         "exp": datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_EXPIRY_DURATION),
