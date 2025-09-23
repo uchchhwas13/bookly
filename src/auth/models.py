@@ -3,6 +3,8 @@ from sqlmodel import SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
 import uuid
 from sqlalchemy.sql import func
+from typing import Optional
+from sqlalchemy import String
 
 
 class User(SQLModel, table=True):
@@ -22,6 +24,9 @@ class User(SQLModel, table=True):
     last_name: str
     is_verified: bool = False
     password_hash: str = Field(exclude=True)
+    refresh_token: Optional[str] = Field(
+        sa_column=Column(String, nullable=True)
+    )
     created_at: datetime = Field(sa_column=Column(
         pg.TIMESTAMP, server_default=func.now()))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, server_default=func.now(),
