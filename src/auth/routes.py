@@ -88,11 +88,20 @@ async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Dep
 
 
 @auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
-async def log_out_user(token_details: HTTPAuthorizationCredentials = Depends(AccessTokenBearer())):
+async def log_out_user(
+    token_details: HTTPAuthorizationCredentials = Depends(AccessTokenBearer()),
+    session: AsyncSession = Depends(get_session),
+):
     user_data = verify_access_token(token_details.credentials)
     if not user_data:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired access token")
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid or expired access token"
+        )
+
     jti = user_data['jti']
     await add_jti_to_blocklist(jti)
+
+    await auth_service.remove_refresh_token(user_data.get('user', {}).get('email'), session)
+
     return LogOutResponse(message="Logged out successfully")

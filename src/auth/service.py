@@ -63,3 +63,11 @@ class AuthService:
         await session.commit()
 
         return new_access_token, new_refresh_token
+
+    async def remove_refresh_token(self, email: str, session: AsyncSession) -> None:
+        print("remove_refresh_token called")
+        user = await self.get_user_by_email(email, session)
+        print("User", user)
+        if user:
+            user.refresh_token = None
+        await session.commit()
