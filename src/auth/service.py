@@ -37,3 +37,42 @@ class AuthService:
         await session.commit()
         await session.refresh(user)
         return user
+
+    async def refresh_tokens(self,  refresh_token: str, session: AsyncSession):
+        token_payload = verify_refresh_token(refresh_token)
+        if not token_payload:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid or expired refresh token"
+            )
+
+        user_id = token_payload.get("user", {}).get("user_uid")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token payload"
+            )
+
+        result = await session.exec(select(User).where(User.uid == user_id))
+        user = result.first()
+
+        if not user or user.refresh_token != refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Refresh token mismatch or invalid"
+            )
+
+        new_refresh_token = create_refresh_token(user_data={
+            'email': user.email,
+            'user_uid': str(user.uid)
+        })
+        user.refresh_token = new_refresh_token
+        new_access_token = create_access_token(user_data={
+            'email': user.email,
+            'user_uid': str(user.uid)
+        })
+
+        session.add(user)
+        await session.commit()
+
+        return new_access_token, new_refresh_token

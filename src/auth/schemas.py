@@ -44,6 +44,7 @@ class LoginResponse(BaseModel):
 
 class RefreshTokenResponse(BaseModel):
     access_token: str
+    refresh_token: str
 
 
 class LogOutResponse(BaseModel):

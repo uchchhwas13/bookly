@@ -66,17 +66,11 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends
 
 
 @auth_router.post('/refresh-access-token', response_model=RefreshTokenResponse)
-async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Depends(RefreshTokenBearer())):
-    user_data = verify_refresh_token(token_details.credentials)
-    if not user_data:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired refresh token")
-    user_data = user_data.get("user")
-    if not user_data:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
-    new_access_token = create_access_token(user_data)
-    return RefreshTokenResponse(access_token=new_access_token)
+async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Depends(RefreshTokenBearer()), session: AsyncSession = Depends(get_session)):
+    access_token, refresh_token = await auth_service.refresh_tokens(
+        token_details.credentials, session
+    )
+    return RefreshTokenResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
