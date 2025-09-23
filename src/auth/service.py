@@ -38,20 +38,7 @@ class AuthService:
         await session.refresh(user)
         return user
 
-    async def refresh_tokens(self,  refresh_token: str, session: AsyncSession):
-        token_payload = verify_refresh_token(refresh_token)
-        if not token_payload:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid or expired refresh token"
-            )
-
-        user_id = token_payload.get("user", {}).get("user_uid")
-        if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid token payload"
-            )
+    async def refresh_tokens(self,  refresh_token: str, user_id: str, session: AsyncSession):
 
         result = await session.exec(select(User).where(User.uid == user_id))
         user = result.first()
