@@ -1,11 +1,11 @@
 from typing import Optional
 from fastapi import Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from .utils import verify_access_token
+from .utils import verify_access_token, verify_refresh_token
 from fastapi.exceptions import HTTPException
 
 
-class AccessTokenBearer(HTTPBearer):
+class TokenBearer(HTTPBearer):
 
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
@@ -24,5 +24,17 @@ class AccessTokenBearer(HTTPBearer):
         return creds
 
     def validate_token(self, token: str) -> bool:
+        raise NotImplementedError(
+            "Please Override this method in child classes")
+
+
+class AccessTokenBearer(TokenBearer):
+    def validate_token(self, token: str) -> bool:
         token_data = verify_access_token(token)
+        return True if token_data is not None else False
+
+
+class RefreshTokenBearer(TokenBearer):
+    def validate_token(self, token: str) -> bool:
+        token_data = verify_refresh_token(token)
         return True if token_data is not None else False
