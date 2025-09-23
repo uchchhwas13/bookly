@@ -1,3 +1,7 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from .utils import create_access_token, create_refresh_token, verify_refresh_token
+from .models import User
+from fastapi import HTTPException, status
 from .models import User
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
@@ -26,3 +30,10 @@ class AuthService:
         await session.commit()
         await session.refresh(new_user)
         return UserModel.model_validate(new_user)
+
+    async def save_refresh_token(self, user: User, refresh_token: str, session: AsyncSession) -> User:
+        user.refresh_token = refresh_token
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user

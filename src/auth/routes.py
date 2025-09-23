@@ -46,6 +46,9 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends
                     'user_uid': str(user.uid)
                 }
             )
+
+            await auth_service.save_refresh_token(user, refresh_token, session)
+
             return LoginResponse(
                 message="Login successful",
                 access_token=access_token,
