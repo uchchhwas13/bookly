@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
-from .schemas import LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
+from src.db.redis import add_jti_to_blocklist
+from .schemas import LogOutResponse, LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
 from .service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
-from .utils import create_access_token, verify_password, create_refresh_token, verify_refresh_token
-from .dependencies import RefreshTokenBearer
+from .utils import create_access_token, verify_access_token, verify_password, create_refresh_token, verify_refresh_token
+from .dependencies import AccessTokenBearer, RefreshTokenBearer
 
 auth_router = APIRouter()
 auth_service = AuthService()
@@ -73,3 +74,14 @@ async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Dep
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
     new_access_token = create_access_token(user_data)
     return RefreshTokenResponse(access_token=new_access_token)
+
+
+@auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
+async def log_out_user(token_details: HTTPAuthorizationCredentials = Depends(AccessTokenBearer())):
+    user_data = verify_access_token(token_details.credentials)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired access token")
+    jti = user_data['jti']
+    await add_jti_to_blocklist(jti)
+    return LogOutResponse(message="Logged out successfully")
