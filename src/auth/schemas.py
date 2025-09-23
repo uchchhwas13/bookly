@@ -40,3 +40,7 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     user: UserResponse
+
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
