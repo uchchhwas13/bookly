@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 import uuid
 import jwt
@@ -22,7 +22,7 @@ def verify_password(password: str, hash: str) -> bool:
 def create_access_token(user_data: dict[str, str]) -> str:
     payload: dict[str, Any] = {
         "user": user_data,
-        "exp": datetime.now() + timedelta(seconds=ACCESS_TOKEN_EXPIRY_DURATION),
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TOKEN_EXPIRY_DURATION),
         "type": "access",
         "jti": str(uuid.uuid4())
     }
@@ -38,7 +38,7 @@ def create_access_token(user_data: dict[str, str]) -> str:
 def create_refresh_token(user_data: dict[str, str]) -> str:
     payload: dict[str, Any] = {
         "user": user_data,
-        "exp": datetime.now() + timedelta(seconds=REFRESH_TOKEN_EXPIRY_DURATION),
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_EXPIRY_DURATION),
         "type": "refresh",
         "jti": str(uuid.uuid4())
     }
