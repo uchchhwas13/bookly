@@ -3,9 +3,10 @@ from fastapi import Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .utils import verify_access_token, verify_refresh_token
 from fastapi.exceptions import HTTPException
+from abc import ABC, abstractmethod
 
 
-class TokenBearer(HTTPBearer):
+class TokenBearer(HTTPBearer, ABC):
 
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
@@ -23,9 +24,9 @@ class TokenBearer(HTTPBearer):
             )
         return creds
 
+    @abstractmethod
     def validate_token(self, token: str) -> bool:
-        raise NotImplementedError(
-            "Please Override this method in child classes")
+        ...
 
 
 class AccessTokenBearer(TokenBearer):
