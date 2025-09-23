@@ -44,3 +44,7 @@ class LoginResponse(BaseModel):
 
 class RefreshTokenResponse(BaseModel):
     access_token: str
+
+
+class LogOutResponse(BaseModel):
+    message: str
