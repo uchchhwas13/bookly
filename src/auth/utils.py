@@ -5,7 +5,6 @@ import uuid
 import jwt
 from passlib.context import CryptContext
 from src.config import config
-import logging
 
 password_context = CryptContext(schemes=["bcrypt"])
 ACCESS_TOKEN_EXPIRY_DURATION = 300
@@ -80,7 +79,7 @@ def verify_refresh_token(token: str) -> Optional[dict[str, Any]]:
     try:
         payload: dict[str, Any] = jwt.decode(
             token,
-            key=config.JWT_ACCESS_TOKEN_SECRET_KEY,
+            key=config.JWT_REFRESH_TOKEN_SECRET_KEY,
             algorithms=[config.JWT_ALGORITHM]
         )
         if payload.get("type") != "refresh":
