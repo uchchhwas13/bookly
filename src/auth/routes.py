@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from .schemas import LoginResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
+from fastapi.security import HTTPAuthorizationCredentials
+from .schemas import LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
 from .service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
-from .utils import create_access_token, verify_password, create_refresh_token
+from .utils import create_access_token, verify_password, create_refresh_token, verify_refresh_token
+from .dependencies import RefreshTokenBearer
 
 auth_router = APIRouter()
 auth_service = AuthService()
@@ -57,3 +59,17 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Invalid Email or Password"
     )
+
+
+@auth_router.post('/refresh-access-token', response_model=RefreshTokenResponse)
+async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Depends(RefreshTokenBearer())):
+    user_data = verify_refresh_token(token_details.credentials)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired refresh token")
+    user_data = user_data.get("user")
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
+    new_access_token = create_access_token(user_data)
+    return RefreshTokenResponse(access_token=new_access_token)
