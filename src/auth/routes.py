@@ -15,7 +15,7 @@ auth_service = AuthService()
 
 
 @auth_router.post('/signup', response_model=UserModel, status_code=status.HTTP_201_CREATED)
-async def create_user_account(user_data: UserCreateModel, session: AsyncSession = Depends(get_session)):
+async def create_user_account(user_data: UserCreateModel, session: Annotated[AsyncSession, Depends(get_session)]):
     email = user_data.email
     user_exists = await auth_service.user_exists(email, session)
 
@@ -28,7 +28,7 @@ async def create_user_account(user_data: UserCreateModel, session: AsyncSession 
 
 
 @auth_router.post('/login', response_model=LoginResponse, status_code=status.HTTP_200_OK)
-async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends(get_session)):
+async def login_user(login_data: UserLoginModel, session: Annotated[AsyncSession, Depends(get_session)]):
     email = login_data.email
     password = login_data.password
 
@@ -68,7 +68,7 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends
 
 
 @auth_router.post('/refresh-access-token', response_model=RefreshTokenResponse)
-async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Depends(RefreshTokenBearer()), session: AsyncSession = Depends(get_session)):
+async def refresh_access_token(token_details: Annotated[HTTPAuthorizationCredentials, Depends(RefreshTokenBearer())], session: Annotated[AsyncSession, Depends(get_session)]):
     token_payload = verify_refresh_token(token_details.credentials)
     if not token_payload:
         raise HTTPException(
@@ -91,7 +91,7 @@ async def refresh_access_token(token_details: HTTPAuthorizationCredentials = Dep
 
 @auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
 async def log_out_user(
-    token_details: HTTPAuthorizationCredentials = Depends(AccessTokenBearer()),
+    token_details: Annotated[HTTPAuthorizationCredentials, Depends(AccessTokenBearer())],
     session: AsyncSession = Depends(get_session),
 ):
     user_data = verify_access_token(token_details.credentials)

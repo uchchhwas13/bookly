@@ -16,7 +16,7 @@ class TokenBearer(HTTPBearer, ABC):
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
         creds = await super().__call__(request)
         if creds is None:
             raise HTTPException(

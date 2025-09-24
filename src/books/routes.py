@@ -1,12 +1,13 @@
 from fastapi import status, APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from typing import List
+from typing import List, Annotated
 from .schemas import BookModel, BookUpdateModel
 from ..db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .service import BookService
 from .schemas import BookCreateModel
 from src.auth.dependencies import AccessTokenBearer
+from fastapi.security import HTTPAuthorizationCredentials
 
 book_router = APIRouter()
 book_service = BookService()
@@ -14,19 +15,19 @@ access_token_bearer = AccessTokenBearer()
 
 
 @book_router.get('/', response_model=List[BookModel])
-async def get_all_books(session: AsyncSession = Depends(get_session), bearer_token=Depends(access_token_bearer)):
+async def get_all_books(session: Annotated[AsyncSession, Depends(get_session)], _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     books = await book_service.get_all_books(session)
     return books
 
 
 @book_router.post('/', response_model=BookModel, status_code=status.HTTP_201_CREATED)
-async def create_a_book(book_data: BookCreateModel, session: AsyncSession = Depends(get_session),  bearer_token=Depends(access_token_bearer)):
+async def create_a_book(book_data: BookCreateModel, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     new_book = await book_service.create_book(book_data, session)
     return new_book
 
 
 @book_router.get('/{book_uid}', response_model=BookModel)
-async def get_book(book_uid: str, session: AsyncSession = Depends(get_session),  bearer_token=Depends(access_token_bearer)):
+async def get_book(book_uid: str, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     book = await book_service.get_book(book_uid, session)
 
     if book:
@@ -37,7 +38,7 @@ async def get_book(book_uid: str, session: AsyncSession = Depends(get_session), 
 
 
 @book_router.patch('/{book_uid}', response_model=BookModel)
-async def update_book(book_uid: str, book_update_data: BookUpdateModel, session: AsyncSession = Depends(get_session),  bearer_token=Depends(access_token_bearer)):
+async def update_book(book_uid: str, book_update_data: BookUpdateModel, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     updated_book = await book_service.update_book(book_uid, book_update_data, session)
     if updated_book:
         return updated_book
@@ -47,7 +48,7 @@ async def update_book(book_uid: str, book_update_data: BookUpdateModel, session:
 
 
 @book_router.delete('/{book_uid}', response_model=BookModel)
-async def delete_book(book_uid: str, session: AsyncSession = Depends(get_session),  bearer_token=Depends(access_token_bearer)):
+async def delete_book(book_uid: str, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     deleted_book = await book_service.delete_book(book_uid, session)
 
     if deleted_book:
