@@ -8,19 +8,21 @@ from ..db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .service import BookService
 from .schemas import BookCreateModel
-from src.auth.dependencies import AccessTokenBearer, RoleChecker, get_current_user_from_token
+from src.auth.dependencies import AccessTokenBearer, get_current_user_from_token
 from fastapi.security import HTTPAuthorizationCredentials
 
 book_router = APIRouter()
 book_service = BookService()
 access_token_bearer = AccessTokenBearer()
-# role_checker = Depends(RoleChecker(allowed_roles=['user', 'admin']))
 
 
 @book_router.get('/', response_model=List[BookModel])
-async def get_all_books(session: Annotated[AsyncSession, Depends(get_session)], _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
-    books = await book_service.get_all_books(session)
-    return books
+async def get_books(session: Annotated[AsyncSession, Depends(get_session)],
+                    _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)],
+                    user_uid: str | None = None):
+    if user_uid:
+        return await book_service.get_user_books(user_uid, session)
+    return await book_service.get_all_books(session)
 
 
 @book_router.post('/', response_model=BookModel, status_code=status.HTTP_201_CREATED)

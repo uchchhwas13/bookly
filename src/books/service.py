@@ -18,6 +18,12 @@ class BookService:
         book = result.first()
         return book if book is not None else None
 
+    async def get_user_books(self, user_uid: str, session: AsyncSession):
+        statement = select(Book).where(
+            Book.user_uid == user_uid).order_by(desc(Book.created_at))
+        result = await session.exec(statement)
+        return result.all()
+
     async def create_book(self, user_uid: UUID, book_data: BookCreateModel, session: AsyncSession):
         book_data_dict = book_data.model_dump()
         new_book = Book(**book_data_dict)
