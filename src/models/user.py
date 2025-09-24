@@ -1,10 +1,14 @@
+from __future__ import annotations
+from typing import List
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Column
+from sqlmodel import Relationship, SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
 import uuid
 from sqlalchemy.sql import func
 from typing import Optional
 from sqlalchemy import String
+
+from src.models.review import Review
 
 
 class User(SQLModel, table=True):
@@ -34,6 +38,8 @@ class User(SQLModel, table=True):
         pg.TIMESTAMP, server_default=func.now()))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, server_default=func.now(),
                                                   onupdate=func.now()))
+    reviews: List[Review] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
