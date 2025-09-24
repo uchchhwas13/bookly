@@ -27,6 +27,9 @@ class User(SQLModel, table=True):
     refresh_token: Optional[str] = Field(
         sa_column=Column(String, nullable=True)
     )
+    role: str = Field(sa_column=Column(
+        pg.VARCHAR, nullable=False, server_default="user"
+    ))
     created_at: datetime = Field(sa_column=Column(
         pg.TIMESTAMP, server_default=func.now()))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, server_default=func.now(),
