@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 from fastapi import Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .models import User
@@ -82,3 +82,18 @@ async def get_current_user_from_token(token_details: Annotated[HTTPAuthorization
     user_email = user_data.get("user", {}).get("email")
     user = await AuthService().get_user_by_email(user_email, session)
     return user
+
+
+class RoleChecker:
+    allowed_roles: List[str]
+
+    def __init__(self, allowed_roles: List[str]) -> None:
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user: Annotated[Optional[User], Depends(get_current_user_from_token)]):
+        if not current_user or current_user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not permitted to perform this action"
+            )
+        return True
