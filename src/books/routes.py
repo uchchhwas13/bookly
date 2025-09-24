@@ -1,17 +1,20 @@
 from fastapi import status, APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from typing import List, Annotated
+
+from src.auth.models import User
 from .schemas import BookModel, BookUpdateModel
 from ..db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .service import BookService
 from .schemas import BookCreateModel
-from src.auth.dependencies import AccessTokenBearer
+from src.auth.dependencies import AccessTokenBearer, RoleChecker, get_current_user_from_token
 from fastapi.security import HTTPAuthorizationCredentials
 
 book_router = APIRouter()
 book_service = BookService()
 access_token_bearer = AccessTokenBearer()
+# role_checker = Depends(RoleChecker(allowed_roles=['user', 'admin']))
 
 
 @book_router.get('/', response_model=List[BookModel])
@@ -21,8 +24,9 @@ async def get_all_books(session: Annotated[AsyncSession, Depends(get_session)], 
 
 
 @book_router.post('/', response_model=BookModel, status_code=status.HTTP_201_CREATED)
-async def create_a_book(book_data: BookCreateModel, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
-    new_book = await book_service.create_book(book_data, session)
+async def create_a_book(book_data: BookCreateModel, session: Annotated[AsyncSession,
+                        Depends(get_session)],  current_user: Annotated[User, Depends(get_current_user_from_token)]):
+    new_book = await book_service.create_book(current_user.uid, book_data, session)
     return new_book
 
 
