@@ -1,13 +1,13 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from .utils import create_access_token, create_refresh_token
-from .models import User
+from ..utils import create_access_token, create_refresh_token
+from ..models.user import User
 from fastapi import HTTPException, status
-from .models import User
+from ..models.user import User
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from .schemas import UserCreateModel, UserModel
-from .utils import generate_password_hash
+from ..schemas.user import UserCreateModel, UserModel
+from ..utils import generate_password_hash
 
 
 class AuthService:

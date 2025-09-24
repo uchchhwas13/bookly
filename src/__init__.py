@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from .books.routes import book_router
-from .auth.routes import auth_router
+from .routes.book_routes import book_router
+from .routes.auth_routes import auth_router
 
 
 version = "v1"

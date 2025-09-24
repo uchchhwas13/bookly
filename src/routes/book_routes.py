@@ -2,13 +2,13 @@ from fastapi import status, APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from typing import List, Annotated
 
-from src.auth.models import User
-from .schemas import BookModel, BookUpdateModel
+from src.models.user import User
+from ..schemas.book import BookModel, BookUpdateModel
 from ..db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
-from .service import BookService
-from .schemas import BookCreateModel
-from src.auth.dependencies import AccessTokenBearer, get_current_user_from_token
+from ..services.book_service import BookService
+from ..schemas.book import BookCreateModel
+from src.dependencies import AccessTokenBearer, get_current_user_from_token
 from fastapi.security import HTTPAuthorizationCredentials
 
 book_router = APIRouter()

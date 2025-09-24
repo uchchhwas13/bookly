@@ -5,7 +5,7 @@ from typing import Any, Optional
 import uuid
 import jwt
 from passlib.context import CryptContext
-from src.config import config
+from .config import config
 
 password_context = CryptContext(schemes=["bcrypt"])
 ACCESS_TOKEN_EXPIRY_DURATION = 300

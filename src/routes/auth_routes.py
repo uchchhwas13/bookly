@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
-from src.auth.models import User
+from src.models.user import User
 from src.db.redis import add_jti_to_blocklist
-from .schemas import LogOutResponse, LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
-from .service import AuthService
+from ..schemas.user import LogOutResponse, LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
+from ..services.auth_service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
-from .utils import create_access_token, verify_access_token, verify_password, create_refresh_token, verify_refresh_token
-from .dependencies import AccessTokenBearer, RefreshTokenBearer, get_current_user_from_token
+from ..utils import create_access_token, verify_access_token, verify_password, create_refresh_token, verify_refresh_token
+from ..dependencies import AccessTokenBearer, RefreshTokenBearer, get_current_user_from_token
 from typing import Annotated
 
 auth_router = APIRouter()

@@ -1,8 +1,8 @@
 from typing import Optional, Annotated, List
 from fastapi import Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from .models import User
-from src.auth.service import AuthService
+from .models.user import User
+from src.services.auth_service import AuthService
 from src.db.main import get_session
 from .utils import verify_access_token, verify_refresh_token
 from fastapi.exceptions import HTTPException
