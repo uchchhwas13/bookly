@@ -16,7 +16,7 @@ book_service = BookService()
 access_token_bearer = AccessTokenBearer()
 
 
-@book_router.get('/', response_model=List[BookModel])
+@book_router.get('/', response_model=List[BookModel], status_code=status.HTTP_200_OK)
 async def get_books(session: Annotated[AsyncSession, Depends(get_session)],
                     _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)],
                     user_uid: str | None = None):
