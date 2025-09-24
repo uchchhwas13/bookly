@@ -52,12 +52,14 @@ class AuthService:
 
         new_refresh_token = create_refresh_token(user_data={
             'email': user.email,
-            'user_uid': str(user.uid)
+            'user_uid': str(user.uid),
+            'role': user.role
         })
         user.refresh_token = new_refresh_token
         new_access_token = create_access_token(user_data={
             'email': user.email,
-            'user_uid': str(user.uid)
+            'user_uid': str(user.uid),
+            'role': user.role
         })
 
         session.add(user)

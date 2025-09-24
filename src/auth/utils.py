@@ -15,6 +15,7 @@ REFRESH_TOKEN_EXPIRY_DURATION = 3600
 class UserDataDict(TypedDict):
     email: str
     user_uid: str
+    role: str
 
 
 def generate_password_hash(password: str) -> str:

@@ -9,6 +9,7 @@ class UserCreateModel(BaseModel):
     username: str = Field(max_length=8)
     email: EmailStr
     password: str = Field(min_length=6)
+    role: str = "user"
 
 
 class UserModel(BaseModel):
@@ -19,6 +20,7 @@ class UserModel(BaseModel):
     last_name: str
     is_verified: bool
     password_hash: str = Field(exclude=True)
+    role: str
     created_at: datetime
     updated_at: datetime
 
