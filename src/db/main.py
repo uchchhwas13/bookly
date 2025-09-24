@@ -1,18 +1,12 @@
 from collections.abc import AsyncGenerator
-from sqlmodel import create_engine, SQLModel
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlmodel import SQLModel
 from src.config import config
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 
-from sqlalchemy.ext.asyncio import AsyncSession as SAAsyncSession, async_sessionmaker, AsyncEngine
-from sqlmodel.ext.asyncio.session import AsyncSession as SMAsyncSession
-
-
-async_engine = AsyncEngine(
-    create_engine(
-        url=config.DATABASE_URL,
-        echo=True
-    )
-)
+async_engine = create_async_engine(
+    config.DATABASE_URL)
 
 
 async def init_db() -> None:
@@ -23,10 +17,10 @@ async def init_db() -> None:
 async_session_maker = async_sessionmaker(
     bind=async_engine,
     expire_on_commit=False,
-    class_=SMAsyncSession,
+    class_=AsyncSession,
 )
 
 
-async def get_session() -> AsyncGenerator[SAAsyncSession, None]:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
