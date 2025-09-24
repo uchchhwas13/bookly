@@ -22,7 +22,7 @@ class Book(SQLModel, table=True):
     published_date: date
     page_count: int
     language: str
-    user_uuid: uuid.UUID = Field(foreign_key="users.uid")
+    user_uid: uuid.UUID = Field(foreign_key="users.uid")
     created_at: datetime = Field(sa_column=Column(
         pg.TIMESTAMP, server_default=func.now()))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, server_default=func.now(),
