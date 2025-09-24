@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from .utils import create_access_token, create_refresh_token
 from .models import User
@@ -10,7 +11,7 @@ from .utils import generate_password_hash
 
 
 class AuthService:
-    async def get_user_by_email(self, email: str, session: AsyncSession):
+    async def get_user_by_email(self, email: str, session: AsyncSession) -> Optional[User]:
         statement = select(User).where(User.email == email)
 
         result = await session.exec(statement)

@@ -1,10 +1,14 @@
-from typing import Optional
-from fastapi import Request, status
+from typing import Optional, Annotated
+from fastapi import Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from .models import User
+from src.auth.service import AuthService
+from src.db.main import get_session
 from .utils import verify_access_token, verify_refresh_token
 from fastapi.exceptions import HTTPException
 from abc import ABC, abstractmethod
 from src.db.redis import token_in_blocklist
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 class TokenBearer(HTTPBearer, ABC):
@@ -68,3 +72,13 @@ class RefreshTokenBearer(TokenBearer):
                 "resolution": "please get new token"
             })
         return True
+
+
+async def get_current_user_from_token(token_details: Annotated[HTTPAuthorizationCredentials, Depends(AccessTokenBearer())],
+                                      session: AsyncSession = Depends(get_session)) -> Optional[User]:
+    user_data = verify_access_token(token_details.credentials)
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user_email = user_data.get("user", {}).get("email")
+    user = await AuthService().get_user_by_email(user_email, session)
+    return user

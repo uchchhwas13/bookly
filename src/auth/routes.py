@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
+from src.auth.models import User
 from src.db.redis import add_jti_to_blocklist
 from .schemas import LogOutResponse, LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
 from .service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .utils import create_access_token, verify_access_token, verify_password, create_refresh_token, verify_refresh_token
-from .dependencies import AccessTokenBearer, RefreshTokenBearer
+from .dependencies import AccessTokenBearer, RefreshTokenBearer, get_current_user_from_token
+from typing import Annotated
 
 auth_router = APIRouter()
 auth_service = AuthService()
@@ -105,3 +107,8 @@ async def log_out_user(
     await auth_service.remove_refresh_token(user_data.get('user', {}).get('email'), session)
 
     return LogOutResponse(message="Logged out successfully")
+
+
+@auth_router.get('/me', response_model=UserModel)
+async def get_current_user(user: Annotated[User, Depends(get_current_user_from_token)]):
+    return user
