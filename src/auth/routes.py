@@ -39,13 +39,15 @@ async def login_user(login_data: UserLoginModel, session: Annotated[AsyncSession
         if password_valid:
             access_token = create_access_token(user_data={
                 'email': user.email,
-                'user_uid': str(user.uid)
+                'user_uid': str(user.uid),
+                'role': user.role
             })
 
             refresh_token = create_refresh_token(
                 user_data={
                     'email': user.email,
-                    'user_uid': str(user.uid)
+                    'user_uid': str(user.uid),
+                    'role': user.role
                 }
             )
 
