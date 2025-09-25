@@ -85,10 +85,10 @@ async def refresh_access_token(request_body: TokenRefreshRequest, session: Annot
             detail="Invalid token payload"
         )
 
-    access_token, refresh_token = await auth_service.refresh_tokens(
+    tokenResponse = await auth_service.refresh_tokens(
         request_body.refresh_token, user_id, session
     )
-    return TokenPairResponse(access_token=access_token, refresh_token=refresh_token)
+    return tokenResponse
 
 
 @auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
