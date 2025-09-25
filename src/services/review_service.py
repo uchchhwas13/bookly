@@ -11,7 +11,7 @@ class ReviewService:
     book_service = BookService()
     auth_service = AuthService()
 
-    async def add_review_to_book(self, user_email: str, book_uid: str, review_data: ReviewCreateModel, session: AsyncSession):
+    async def add_review_to_book(self, user_email: str, book_uid: str, review_data: ReviewCreateModel, session: AsyncSession) -> Review:
         try:
             book = await self.book_service.get_book(book_uid, session)
             user = await self.auth_service.get_user_by_email(user_email, session)
