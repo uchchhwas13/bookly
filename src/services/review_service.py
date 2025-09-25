@@ -1,4 +1,4 @@
-from src.models.user import Review
+from src.models.review import Review
 from src.schemas.review import ReviewCreateModel
 from .auth_service import AuthService
 from .book_service import BookService
