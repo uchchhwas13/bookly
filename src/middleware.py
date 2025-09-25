@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, Response
 import time
 from typing import Callable, Awaitable
 import logging
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 logger = logging.getLogger('uvicorn.access')
 logger.disabled = True
@@ -25,3 +27,14 @@ def register_middleware(app: FastAPI):
             f"[Response] {method} {url} - Status: {status_code} - Time: {process_time:.4f}s")
 
         return response
+
+    app.add_middleware(CORSMiddleware,
+                       allow_origins=["*"],
+                       allow_methods=["*"],
+                       allow_headers=["*"],
+                       allow_credentials=False,
+                       )
+
+    app.add_middleware(TrustedHostMiddleware,
+                       allowed_hosts=["localhost", "127.0.0.1"]
+                       )
