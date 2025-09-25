@@ -1,6 +1,10 @@
 from fastapi import FastAPI, Request, Response
 import time
 from typing import Callable, Awaitable
+import logging
+
+logger = logging.getLogger('uvicorn.access')
+logger.disabled = True
 
 
 def register_middleware(app: FastAPI):
@@ -12,7 +16,7 @@ def register_middleware(app: FastAPI):
 
         print(f"[Request] {method} {url} - Start")
 
-        response: Response = await call_next(request)
+        response = await call_next(request)
 
         process_time = time.time() - start_time
         status_code = response.status_code
