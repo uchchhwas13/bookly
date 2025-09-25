@@ -1,9 +1,8 @@
 from fastapi import status, APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from typing import List, Annotated
-
 from src.models.user import User
-from ..schemas.book import BookModel, BookUpdateModel
+from ..schemas.book import BookDetailsModel, BookModel, BookUpdateModel
 from ..db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from ..services.book_service import BookService
@@ -16,7 +15,7 @@ book_service = BookService()
 access_token_bearer = AccessTokenBearer()
 
 
-@book_router.get('/', response_model=List[BookModel], status_code=status.HTTP_200_OK)
+@book_router.get('/', response_model=List[BookDetailsModel], status_code=status.HTTP_200_OK)
 async def get_books(session: Annotated[AsyncSession, Depends(get_session)],
                     _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)],
                     user_uid: str | None = None):
@@ -32,7 +31,7 @@ async def create_a_book(book_data: BookCreateModel, session: Annotated[AsyncSess
     return new_book
 
 
-@book_router.get('/{book_uid}', response_model=BookModel)
+@book_router.get('/{book_uid}', response_model=BookDetailsModel)
 async def get_book(book_uid: str, session: Annotated[AsyncSession, Depends(get_session)],  _: Annotated[HTTPAuthorizationCredentials, Depends(access_token_bearer)]):
     book = await book_service.get_book(book_uid, session)
 
