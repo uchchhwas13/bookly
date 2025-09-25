@@ -7,7 +7,7 @@ from ..services.auth_service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from ..utils import create_access_token, verify_access_token, verify_password, create_refresh_token, verify_refresh_token
-from ..dependencies import AccessTokenBearer, RefreshTokenBearer, get_current_user_from_token
+from ..dependencies import AccessTokenBearer, get_current_user_from_token
 from typing import Annotated
 
 auth_router = APIRouter()
