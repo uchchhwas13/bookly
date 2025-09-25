@@ -1,0 +1,23 @@
+from fastapi import FastAPI, Request, Response
+import time
+from typing import Callable, Awaitable
+
+
+def register_middleware(app: FastAPI):
+    @app.middleware("http")
+    async def custom_logging(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+        start_time = time.time()
+        method = request.method
+        url = str(request.url)
+
+        print(f"[Request] {method} {url} - Start")
+
+        response: Response = await call_next(request)
+
+        process_time = time.time() - start_time
+        status_code = response.status_code
+
+        print(
+            f"[Response] {method} {url} - Status: {status_code} - Time: {process_time:.4f}s")
+
+        return response
