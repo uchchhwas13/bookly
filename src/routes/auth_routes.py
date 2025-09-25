@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from src.models.user import User
 from src.db.redis import add_jti_to_blocklist
-from ..schemas.user import LogOutResponse, LoginResponse, RefreshTokenResponse, UserCreateModel, UserModel, UserLoginModel, UserResponse
+from ..schemas.user import LogOutResponse, LoginResponse, TokenPairResponse, TokenRefreshRequest, UserCreateModel, UserModel, UserLoginModel, UserResponse
 from ..services.auth_service import AuthService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -69,9 +69,9 @@ async def login_user(login_data: UserLoginModel, session: Annotated[AsyncSession
     )
 
 
-@auth_router.post('/refresh-access-token', response_model=RefreshTokenResponse)
-async def refresh_access_token(token_details: Annotated[HTTPAuthorizationCredentials, Depends(RefreshTokenBearer())], session: Annotated[AsyncSession, Depends(get_session)]):
-    token_payload = verify_refresh_token(token_details.credentials)
+@auth_router.post('/token/refresh', response_model=TokenPairResponse)
+async def refresh_access_token(request_body: TokenRefreshRequest, session: Annotated[AsyncSession, Depends(get_session)]):
+    token_payload = verify_refresh_token(request_body.refresh_token)
     if not token_payload:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -86,9 +86,9 @@ async def refresh_access_token(token_details: Annotated[HTTPAuthorizationCredent
         )
 
     access_token, refresh_token = await auth_service.refresh_tokens(
-        token_details.credentials, user_id, session
+        request_body.refresh_token, user_id, session
     )
-    return RefreshTokenResponse(access_token=access_token, refresh_token=refresh_token)
+    return TokenPairResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @auth_router.post('/logout', response_model=LogOutResponse, status_code=status.HTTP_200_OK)
