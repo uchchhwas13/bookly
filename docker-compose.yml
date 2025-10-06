@@ -1,0 +1,29 @@
+services:
+  api:
+    build: .
+    container_name: fastapi-docker-container
+    ports:
+      - "80:80"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://cefalo:cefalo@db:5432/bookly_db
+      - JWT_ACCESS_TOKEN_SECRET_KEY=cefalo2025
+      - JWT_REFRESH_TOKEN_SECRET_KEY=cefalo2025@
+      - JWT_ALGORITHM=HS256
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: cefalo
+      POSTGRES_PASSWORD: cefalo
+      POSTGRES_DB: bookly_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
