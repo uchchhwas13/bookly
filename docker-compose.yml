@@ -3,7 +3,7 @@ services:
     build: .
     container_name: fastapi-docker-container
     ports:
-      - "80:80"
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://cefalo:cefalo@db:5432/bookly_db
       - JWT_ACCESS_TOKEN_SECRET_KEY=cefalo2025
